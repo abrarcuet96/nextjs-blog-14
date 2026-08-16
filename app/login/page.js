@@ -1,34 +1,29 @@
 "use client";
+import { login } from "@/lib/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+  const mutation = useMutation({
+    mutationFn: login,
+    onSuccess: (data) => {
+      queryClient.setQueryData(["current-user"], data);
+      router.push("/dashboard");
+      router.refresh();
+    },
+  });
 
-  function handleChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-
-    const data = await res.json();
-    setLoading(false);
-
-    if (!res.ok) return setError(data.error);
-    router.push("/");
+  function onSubmit(values) {
+    mutation.mutate(values);
   }
 
   return (
@@ -36,48 +31,49 @@ export default function LoginPage() {
       <h1 className="text-2xl font-bold text-gray-900 mb-1">Welcome back</h1>
       <p className="text-sm text-gray-500 mb-6">Login to manage your posts.</p>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 mb-1">
             Email
           </label>
           <input
-            name="email"
+            id="login-email"
             type="email"
-            value={form.email}
-            onChange={handleChange}
+            {...register("email", {
+              required: "Email is required",
+              pattern: { value: /^\S+@\S+\.\S+$/, message: "Enter a valid email" },
+            })}
             placeholder="you@example.com"
-            required
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
+          {errors.email ? <p className="mt-1 text-sm text-error">{errors.email.message}</p> : null}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 mb-1">
             Password
           </label>
           <input
-            name="password"
+            id="login-password"
             type="password"
-            value={form.password}
-            onChange={handleChange}
+            {...register("password", { required: "Password is required" })}
             placeholder="Your password"
-            required
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
+          {errors.password ? <p className="mt-1 text-sm text-error">{errors.password.message}</p> : null}
         </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-3 py-2">
-            {error}
+        {mutation.error ? (
+          <div role="alert" className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-3 py-2">
+            {mutation.error.message}
           </div>
-        )}
+        ) : null}
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={mutation.isPending}
           className="w-full bg-indigo-600 text-white py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors disabled:opacity-60"
         >
-          {loading ? "Logging in..." : "Login"}
+          {mutation.isPending ? "Logging in..." : "Login"}
         </button>
       </form>
 
