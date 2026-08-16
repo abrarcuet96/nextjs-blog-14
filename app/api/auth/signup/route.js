@@ -1,4 +1,4 @@
-import { generateToken } from "@/lib/auth";
+import { generateToken, setAuthCookie } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import User from "@/lib/models/User";
 import bcrypt from "bcryptjs";
@@ -15,16 +15,29 @@ export async function POST(request) {
       );
     }
 
-    const existing = await User.findOne({ email });
-    if (existing) {
+    if (password.length < 6) {
       return NextResponse.json(
-        { error: "User already exists" },
+        { error: "Password must be at least 6 characters" },
         { status: 400 },
       );
     }
 
+    const cleanEmail = email.trim().toLowerCase();
+
+    const existing = await User.findOne({ email: cleanEmail });
+    if (existing) {
+      return NextResponse.json(
+        { error: "An account with this email already exists" },
+        { status: 409 },
+      );
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hashedPassword });
+    const user = await User.create({
+      name: name.trim(),
+      email: cleanEmail,
+      password: hashedPassword,
+    });
 
     const token = generateToken({
       id: user._id.toString(),
@@ -33,19 +46,23 @@ export async function POST(request) {
     });
 
     const response = NextResponse.json(
-      { message: "User created successfully", user },
+      {
+        message: "User created successfully",
+        user: {
+          id: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+      },
       { status: 201 },
     );
 
-    response.cookies.set("nextjs-blog-14", token, {
-      httpOnly: true,
-      path: "/",
-      maxAge: 7 * 24 * 60 * 60,
-    });
+    setAuthCookie(response, token);
 
     return response;
   } catch (error) {
-    console.error(error);
+    console.error("POST /api/auth/signup failed:", error);
     return NextResponse.json(
       { error: "An error occurred while creating the user" },
       { status: 500 },
