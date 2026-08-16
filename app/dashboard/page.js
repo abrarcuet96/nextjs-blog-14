@@ -3,8 +3,11 @@
 import { deletePost, getMyPosts } from "@/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { useState } from "react";
+import DeletePostModal from "@/components/DeletePostModal";
 
 export default function DashboardPage() {
+  const [postToDelete, setPostToDelete] = useState(null);
   const queryClient = useQueryClient();
   const { data, error, isPending } = useQuery({
     queryKey: ["my-posts"],
@@ -13,15 +16,25 @@ export default function DashboardPage() {
   const deleteMutation = useMutation({
     mutationFn: deletePost,
     onSuccess: () => {
+      setPostToDelete(null);
       queryClient.invalidateQueries({ queryKey: ["my-posts"] });
       queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
   });
 
-  function handleDelete(post) {
-    if (window.confirm(`Delete “${post.title}”? This cannot be undone.`)) {
-      deleteMutation.mutate(post._id);
-    }
+  function handleDelete() {
+    if (postToDelete) deleteMutation.mutate(postToDelete._id);
+  }
+
+  function openDeleteModal(post) {
+    deleteMutation.reset();
+    setPostToDelete(post);
+  }
+
+  function closeDeleteModal() {
+    if (deleteMutation.isPending) return;
+    deleteMutation.reset();
+    setPostToDelete(null);
   }
 
   return (
@@ -34,10 +47,6 @@ export default function DashboardPage() {
         </div>
         <Link href="/dashboard/posts/new" className="btn btn-primary">New post</Link>
       </div>
-
-      {deleteMutation.error ? (
-        <div role="alert" className="alert alert-error mb-6">{deleteMutation.error.message}</div>
-      ) : null}
 
       {isPending ? (
         <div className="skeleton h-48 rounded-2xl" />
@@ -64,7 +73,7 @@ export default function DashboardPage() {
                   <td>
                     <div className="flex justify-end gap-2">
                       <Link href={`/dashboard/posts/${post._id}/edit`} className="btn btn-ghost btn-xs">Edit</Link>
-                      <button type="button" onClick={() => handleDelete(post)} disabled={deleteMutation.isPending} className="btn btn-error btn-outline btn-xs">Delete</button>
+                      <button type="button" onClick={() => openDeleteModal(post)} className="btn btn-error btn-outline btn-xs">Delete</button>
                     </div>
                   </td>
                 </tr>
@@ -73,6 +82,14 @@ export default function DashboardPage() {
           </table>
         </div>
       )}
+
+      <DeletePostModal
+        post={postToDelete}
+        error={deleteMutation.error}
+        isPending={deleteMutation.isPending}
+        onCancel={closeDeleteModal}
+        onConfirm={handleDelete}
+      />
     </section>
   );
 }
