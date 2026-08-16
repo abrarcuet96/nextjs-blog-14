@@ -25,7 +25,7 @@ NextBlog is a small full-stack blog built for students learning the Next.js App 
 - Search, tags, reading time, sharing, empty states, and error pages
 - Small unit tests using Node's built-in test runner
 - Titles, descriptions, canonical URLs, Open Graph, and JSON-LD
-- Dynamic `sitemap.xml`, `robots.txt`, and `llms.txt` for search engines and agents
+- Dynamic `sitemap.xml`, `robots.txt`, and `llms.txt` for Google Search, ChatGPT, and Claude
 
 ## Project structure
 
@@ -105,3 +105,7 @@ npm start        # Run the production build
 - API routes repeat a little validation so students can follow each request without learning an abstraction first.
 
 Before deployment, set `NEXT_PUBLIC_SITE_URL` to the real HTTPS address so canonical links, the sitemap, sharing, and structured data use the production URL.
+
+### Crawler policy
+
+The site keeps normal Google Search crawling enabled and explicitly supports ChatGPT and Claude discovery. `Google-Extended` is blocked so the content is opted out of Gemini model training and grounding without affecting ordinary Google Search inclusion or ranking.
