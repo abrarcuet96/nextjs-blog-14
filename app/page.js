@@ -1,8 +1,25 @@
 import BlogList from "@/components/BlogList";
+import { siteConfig } from "@/lib/site";
+
+export const metadata = {
+  alternates: { canonical: "/" },
+};
 
 export default function Home() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: siteConfig.name,
+            description: siteConfig.description,
+            url: siteConfig.url,
+          }).replace(/</g, "\\u003c"),
+        }}
+      />
       <section className="border-b border-base-300 bg-base-100">
         <div className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6 sm:py-24">
           <span className="badge badge-primary badge-outline mb-5">

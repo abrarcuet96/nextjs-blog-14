@@ -33,10 +33,11 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 mb-1">
             Email
           </label>
           <input
+            id="login-email"
             type="email"
             {...register("email", {
               required: "Email is required",
@@ -48,10 +49,11 @@ export default function LoginPage() {
           {errors.email ? <p className="mt-1 text-sm text-error">{errors.email.message}</p> : null}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 mb-1">
             Password
           </label>
           <input
+            id="login-password"
             type="password"
             {...register("password", { required: "Password is required" })}
             placeholder="Your password"
@@ -61,7 +63,7 @@ export default function LoginPage() {
         </div>
 
         {mutation.error ? (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-3 py-2">
+          <div role="alert" className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-3 py-2">
             {mutation.error.message}
           </div>
         ) : null}

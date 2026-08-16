@@ -8,7 +8,12 @@ export async function POST(request) {
   try {
     await connectDB();
     const { email, password } = await request.json();
-    if (!email || !password) {
+    if (
+      typeof email !== "string" ||
+      typeof password !== "string" ||
+      !email.trim() ||
+      !password
+    ) {
       return NextResponse.json(
         { error: "Email and password are required" },
         { status: 400 },

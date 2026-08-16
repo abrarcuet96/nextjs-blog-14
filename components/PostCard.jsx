@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getReadingTime } from "@/lib/post-utils.mjs";
 
 const formatter = new Intl.DateTimeFormat("en", {
   day: "numeric",
@@ -28,9 +29,12 @@ export default function PostCard({ post }) {
         <p className="text-base-content/70">{preview}</p>
         <div className="card-actions mt-4 items-center justify-between border-t border-base-200 pt-4 text-sm text-base-content/60">
           <span>{post.author?.name || "NextBlog writer"}</span>
-          <time dateTime={post.createdAt}>
-            {formatter.format(new Date(post.createdAt))}
-          </time>
+          <span>
+            <time dateTime={post.createdAt}>
+              {formatter.format(new Date(post.createdAt))}
+            </time>{" "}
+            · {getReadingTime(post.body)} min read
+          </span>
         </div>
       </div>
     </article>

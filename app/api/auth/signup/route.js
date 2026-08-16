@@ -8,7 +8,14 @@ export async function POST(request) {
   try {
     await connectDB();
     const { name, email, password } = await request.json();
-    if (!name || !email || !password) {
+    if (
+      typeof name !== "string" ||
+      typeof email !== "string" ||
+      typeof password !== "string" ||
+      !name.trim() ||
+      !email.trim() ||
+      !password
+    ) {
       return NextResponse.json(
         { error: "All fields are required" },
         { status: 400 },

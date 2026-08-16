@@ -1,14 +1,27 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import QueryProvider from "@/components/QueryProvider";
+import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
 export const metadata = {
+  metadataBase: new URL(siteConfig.url),
   title: {
-    default: "NextBlog",
-    template: "%s | NextBlog",
+    default: siteConfig.name,
+    template: `%s | ${siteConfig.name}`,
   },
-  description: "A friendly place to learn, write, and share useful ideas.",
+  description: siteConfig.description,
+  openGraph: {
+    type: "website",
+    siteName: siteConfig.name,
+    title: siteConfig.name,
+    description: siteConfig.description,
+  },
+  twitter: {
+    card: "summary",
+    title: siteConfig.name,
+    description: siteConfig.description,
+  },
 };
 
 export default function RootLayout({ children }) {

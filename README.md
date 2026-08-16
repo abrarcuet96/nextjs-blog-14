@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# NextBlog
 
-## Getting Started
+NextBlog is a small full-stack blog built for students learning the Next.js App Router. It includes public articles, authentication, a writer dashboard, MongoDB CRUD operations, form validation, loading and error states, tests, and practical SEO.
 
-First, run the development server:
+## What students learn
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### 1. Project foundation
+
+- App Router folder structure and reusable components
+- Route Handler APIs under `app/api`
+- A responsive homepage and dynamic article list
+- TanStack Query for fetching, caching, loading, and error states
+
+### 2. Authentication and post management
+
+- Signup, login, logout, and an HTTP-only JWT cookie
+- Protected dashboard routes
+- Create, read, update, and delete operations with MongoDB and Mongoose
+- React Hook Form validation for every form
+- Ownership checks so writers can only change their own posts
+- Draft and published article states
+
+### 3. Polish, testing, and SEO
+
+- Search, tags, reading time, sharing, empty states, and error pages
+- Small unit tests using Node's built-in test runner
+- Titles, descriptions, canonical URLs, Open Graph, and JSON-LD
+- Dynamic `sitemap.xml`, `robots.txt`, and `llms.txt` for search engines and agents
+
+## Project structure
+
+```text
+app/
+  api/                 # Backend route handlers
+  dashboard/           # Protected writer pages
+  posts/[id]/          # Server-rendered article page
+  layout.js            # Shared page shell and metadata
+  page.js              # Homepage
+components/            # Reusable UI and form components
+lib/
+  models/              # Mongoose models
+  api.js                # Browser API helper functions
+  auth.js               # JWT and cookie helpers
+  db.js                 # Cached MongoDB connection
+  post-utils.mjs        # Small tested helper functions
+tests/                  # Unit tests
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Run locally
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+1. Install Node.js 20 or newer and start a local MongoDB server, or create a MongoDB Atlas database.
+2. Install packages:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   ```bash
+   npm install
+   ```
 
-## Learn More
+3. Copy `.env.example` to `.env.local` and update the values:
 
-To learn more about Next.js, take a look at the following resources:
+   ```env
+   MONGODB_URI=mongodb://127.0.0.1:27017/nextblog
+   JWT_SECRET=use-a-long-random-secret-here
+   NEXT_PUBLIC_SITE_URL=http://localhost:3000
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. Start the development server:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```bash
+   npm run dev
+   ```
 
-## Deploy on Vercel
+5. Open [http://localhost:3000](http://localhost:3000), create an account, and publish the first post.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Useful commands
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run dev      # Start the development server
+npm run lint     # Check code quality
+npm test         # Run unit tests
+npm run build    # Create a production build
+npm start        # Run the production build
+```
+
+## API overview
+
+| Method | Route | Purpose | Login required |
+| --- | --- | --- | --- |
+| `GET` | `/api/posts` | List published posts | No |
+| `GET` | `/api/posts?mine=true` | List the current writer's posts | Yes |
+| `POST` | `/api/posts` | Create a post | Yes |
+| `GET` | `/api/posts/:id` | Read a visible post | Drafts only for owner |
+| `PUT` | `/api/posts/:id` | Update an owned post | Yes |
+| `DELETE` | `/api/posts/:id` | Delete an owned post | Yes |
+| `POST` | `/api/auth/signup` | Create an account | No |
+| `POST` | `/api/auth/login` | Log in | No |
+| `POST` | `/api/auth/logout` | Log out | No |
+| `GET` | `/api/auth/me` | Read the current user | Yes |
+
+## Beginner-friendly design choices
+
+- Route Handlers keep the frontend and backend in one Next.js project.
+- JWT authentication is intentionally small and visible instead of hidden behind a large auth library.
+- TanStack Query handles server data; React Hook Form handles form state. Each library has one clear job.
+- Articles use plain text with preserved line breaks. A rich-text editor can be a later lesson.
+- API routes repeat a little validation so students can follow each request without learning an abstraction first.
+
+Before deployment, set `NEXT_PUBLIC_SITE_URL` to the real HTTPS address so canonical links, the sitemap, sharing, and structured data use the production URL.

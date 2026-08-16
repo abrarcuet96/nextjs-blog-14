@@ -1,6 +1,7 @@
 "use client";
 
 import { createPost, updatePost } from "@/lib/api";
+import { splitTagsInput } from "@/lib/post-utils.mjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -29,7 +30,7 @@ export default function PostForm({ post }) {
     mutationFn: (values) => {
       const cleanPost = {
         ...values,
-        tags: values.tags.split(",").map((tag) => tag.trim()).filter(Boolean),
+        tags: splitTagsInput(values.tags),
       };
       return post ? updatePost(post._id, cleanPost) : createPost(cleanPost);
     },

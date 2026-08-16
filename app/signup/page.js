@@ -37,10 +37,11 @@ export default function SignupPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="signup-name" className="block text-sm font-medium text-gray-700 mb-1">
             Full Name
           </label>
           <input
+            id="signup-name"
             {...register("name", {
               required: "Name is required",
               minLength: { value: 2, message: "Use at least 2 characters" },
@@ -51,10 +52,11 @@ export default function SignupPage() {
           {errors.name ? <p className="mt-1 text-sm text-error">{errors.name.message}</p> : null}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="signup-email" className="block text-sm font-medium text-gray-700 mb-1">
             Email
           </label>
           <input
+            id="signup-email"
             type="email"
             {...register("email", {
               required: "Email is required",
@@ -66,10 +68,11 @@ export default function SignupPage() {
           {errors.email ? <p className="mt-1 text-sm text-error">{errors.email.message}</p> : null}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="signup-password" className="block text-sm font-medium text-gray-700 mb-1">
             Password
           </label>
           <input
+            id="signup-password"
             type="password"
             {...register("password", {
               required: "Password is required",
@@ -82,7 +85,7 @@ export default function SignupPage() {
         </div>
 
         {mutation.error ? (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-3 py-2">
+          <div role="alert" className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-3 py-2">
             {mutation.error.message}
           </div>
         ) : null}

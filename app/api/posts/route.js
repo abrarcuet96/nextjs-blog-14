@@ -1,6 +1,7 @@
 import { AUTH_COOKIE, verifyToken } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Post from "@/lib/models/Post";
+import { escapeRegex, normalizeTags } from "@/lib/post-utils.mjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -25,9 +26,10 @@ export async function GET(request) {
     }
 
     if (search) {
+      const safeSearch = escapeRegex(search);
       filter.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { body: { $regex: search, $options: "i" } },
+        { title: { $regex: safeSearch, $options: "i" } },
+        { body: { $regex: safeSearch, $options: "i" } },
       ];
     }
 
@@ -62,7 +64,12 @@ export async function POST(request) {
     await connectDB();
     const { title, body, tags, published } = await request.json();
 
-    if (!title?.trim() || !body?.trim()) {
+    if (
+      typeof title !== "string" ||
+      typeof body !== "string" ||
+      !title.trim() ||
+      !body.trim()
+    ) {
       return NextResponse.json(
         { error: "Title and body are required" },
         { status: 400 },
@@ -72,10 +79,8 @@ export async function POST(request) {
     const post = await Post.create({
       title: title.trim(),
       body: body.trim(),
-      tags: Array.isArray(tags)
-        ? tags.map((tag) => tag.trim().toLowerCase()).filter(Boolean).slice(0, 5)
-        : [],
-      published: published ?? true,
+      tags: normalizeTags(tags),
+      published: typeof published === "boolean" ? published : true,
       author: user.id,
     });
 
