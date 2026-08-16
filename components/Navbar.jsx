@@ -1,5 +1,23 @@
-const Navbar = () => {
-  return <div>Navbar</div>;
-};
+import Link from "next/link";
+
+const Navbar = () => (
+  <header className="border-b border-base-300 bg-base-100">
+    <nav className="navbar mx-auto max-w-6xl px-4 sm:px-6">
+      <div className="navbar-start">
+        <Link href="/" className="text-xl font-bold text-primary">
+          NextBlog
+        </Link>
+      </div>
+      <div className="navbar-end gap-2">
+        <Link href="/login" className="btn btn-ghost btn-sm">
+          Log in
+        </Link>
+        <Link href="/signup" className="btn btn-primary btn-sm">
+          Start writing
+        </Link>
+      </div>
+    </nav>
+  </header>
+);
 
 export default Navbar;

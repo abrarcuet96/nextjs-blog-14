@@ -4,6 +4,39 @@ import Post from "@/lib/models/Post";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
+export async function GET(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get("search")?.trim();
+    const tag = searchParams.get("tag")?.trim().toLowerCase();
+
+    const filter = { published: true };
+
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { body: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    if (tag) filter.tags = tag;
+
+    await connectDB();
+    const posts = await Post.find(filter)
+      .populate("author", "name")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return NextResponse.json({ posts });
+  } catch (error) {
+    console.error("GET /api/posts failed:", error);
+    return NextResponse.json(
+      { error: "We could not load the posts. Please try again." },
+      { status: 500 },
+    );
+  }
+}
+
 export async function POST(request) {
   try {
     const cookieStore = await cookies();
